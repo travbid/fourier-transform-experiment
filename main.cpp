@@ -2,6 +2,7 @@
 #include <bit>
 #include <chrono>
 #include <complex>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <numbers>
@@ -18,7 +19,7 @@ using ustream = std::basic_fstream<uint8_t>;
 namespace {
 
 constexpr auto pi = std::numbers::pi_v<double>;
-constexpr bool IS_LITTLE_ENDIAN = std::bit_cast<uint32_t>(std::array<uint8_t, 4>{1, 0, 0, 0}) == 1;
+// constexpr bool IS_LITTLE_ENDIAN = std::bit_cast<uint32_t>(std::array<uint8_t, 4>{1, 0, 0, 0}) == 1;
 
 uint16_t operator""_u16(unsigned long long int val) {
     return val;
@@ -227,8 +228,7 @@ FourierReturn discrete_fourier_transform(const std::vector<int16_t> &data) {
         for (size_t n = 0; n != N; ++n) {
             ++iterations;
             const double xn = data.at(n);
-            const auto exp = -(2.0 * pi * k * n) / N;
-            const auto fn = xn * complex(std::cos(exp), std::sin(exp));
+            const auto fn = xn * std::polar(1.0, -(2.0 * pi * k * n) / N);
             fk += fn;
         }
         const auto magnitude = std::sqrt((fk.real() * fk.real()) + (fk.imag() * fk.imag())) / N;
@@ -263,8 +263,7 @@ std::vector<complex> fast_fourier_transform_inner(const std::vector<int16_t> &da
         const auto odds_fft = fast_fourier_transform_inner(odds, iterations);
         std::vector<complex> ret(N, complex(0, 0));
         for (size_t i = 0; i != M; ++i) {
-            const auto exp = (2.0 * pi * i) / data.size();
-            const auto w = complex(std::cos(exp), std::sin(exp));
+            const auto w = std::polar(1.0, (2.0 * pi * i) / data.size());
             ret[i] = evens_fft[i] + (w * odds_fft[i]);
             ret[i + (ret.size() / 2)] = evens_fft[i] - (w * odds_fft[i]);
         }
@@ -274,7 +273,7 @@ std::vector<complex> fast_fourier_transform_inner(const std::vector<int16_t> &da
     const double xn = data[0];
     // m = 0, therefore e^(-2*pi*k*m/N) = 1
     // const auto exp = -(2.0 * pi * k * m) / (N / depth);
-    // const auto fn = xn * complex(std::cos(exp), std::sin(exp));
+    // const auto fn = xn * std::polar(1.0, exp);
     // return fn;
     return {complex(xn, 0)};
 }
