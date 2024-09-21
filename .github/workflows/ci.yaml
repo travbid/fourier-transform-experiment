@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - ci
     paths-ignore:
       - '**.md'
   pull_request:
@@ -16,18 +15,22 @@ permissions:
 jobs:
   build-and-run:
     name: Build and Run
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - run: >
-        cmake
-        -S .
-        -B build
-        -GNinja
-        -DCMAKE_BUILD_TYPE=Release
-        -DCMAKE_C_COMPILER=clang
-        -DCMAKE_CXX_COMPILER=clang++
+          sudo apt-get install -y
+          ninja-build
+      - run: ls -lah
+      - run: >
+          cmake
+          -S .
+          -B build
+          -GNinja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_C_COMPILER=clang
+          -DCMAKE_CXX_COMPILER=clang++
       - run: cmake --build build --verbose
       - run: ./build/fft ./440Hz.wav 0 4096 ./A.csv
       - run: cat ./A.csv
