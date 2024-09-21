@@ -1,0 +1,33 @@
+name: ci
+on:
+  push:
+    branches:
+      - master
+      - ci
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-run:
+    name: Build and Run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: >
+        cmake
+        -S .
+        -B build
+        -GNinja
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_CXX_COMPILER=clang++
+      - run: cmake --build build --verbose
+      - run: ./build/fft ./440Hz.wav 0 4096 ./A.csv
+      - run: cat ./A.csv
