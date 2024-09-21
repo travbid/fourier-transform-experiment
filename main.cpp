@@ -14,8 +14,6 @@
 
 namespace chrono = std::chrono;
 
-using ustream = std::basic_fstream<uint8_t>;
-
 namespace {
 
 constexpr auto pi = std::numbers::pi_v<double>;
@@ -28,7 +26,7 @@ uint32_t operator""_u32(unsigned long long int val) {
     return val;
 }
 
-void check_stream(const ustream &stream) {
+void check_stream(const std::fstream &stream) {
     if (stream.eof()) {
         std::println(stderr, "Unexpected end of file");
         std::exit(EXIT_FAILURE);
@@ -60,30 +58,30 @@ void expect<std::string>(const std::string &actual, const std::string &expected)
 }
 
 template <size_t Size>
-std::array<uint8_t, Size> read_bytes(ustream &stream) {
-    std::array<uint8_t, Size> buf;
+std::array<char, Size> read_bytes(std::fstream &stream) {
+    std::array<char, Size> buf;
     stream.read(buf.data(), Size);
     check_stream(stream);
     return buf;
 }
 
-int16_t read_i16(ustream &stream) {
+int16_t read_i16(std::fstream &stream) {
     const auto buf = read_bytes<2>(stream);
     return std::bit_cast<int16_t>(buf);
 }
 
-uint16_t read_u16(ustream &stream) {
+uint16_t read_u16(std::fstream &stream) {
     const auto buf = read_bytes<2>(stream);
     return std::bit_cast<uint16_t>(buf);
 }
 
-uint32_t read_u32(ustream &stream) {
+uint32_t read_u32(std::fstream &stream) {
     const auto buf = read_bytes<4>(stream);
     return std::bit_cast<uint32_t>(buf);
 }
 
-std::string read_string(ustream &stream, const size_t len) {
-    std::vector<uint8_t> buf(len, 0);
+std::string read_string(std::fstream &stream, const size_t len) {
+    std::vector<char> buf(len, 0);
     stream.read(buf.data(), buf.size());
     check_stream(stream);
     return std::string(buf.data(), buf.data() + buf.size());
@@ -117,7 +115,7 @@ struct WavInfo {
     std::vector<InfoItem> info_items;
 };
 
-WavInfo read_wav_info(ustream &wav_stream) {
+WavInfo read_wav_info(std::fstream &wav_stream) {
     const auto chunk_id = read_string(wav_stream, 4);
     expect<std::string>(chunk_id, "RIFF");
 
@@ -315,7 +313,7 @@ int main(const int argc, char const *const *argv) {
     const std::string out_filename{argv[4]};
 
     // Open input file
-    auto wav_stream = ustream(in_filename, std::ios_base::in | std::ios_base::binary);
+    auto wav_stream = std::fstream(in_filename, std::ios_base::in | std::ios_base::binary);
     const auto &[num_channels, sample_rate, byte_rate, block_align, bits_per_sample, info_items] =
         read_wav_info(wav_stream);
 
