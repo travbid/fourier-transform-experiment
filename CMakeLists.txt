@@ -16,10 +16,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
 
-# option(USE_LTO "Enable Link-Time Optimization for Release builds" ON)
-# option(USE_LIBC++ "Add the compilation flag -stdlib=libc++" OFF)
-# option(BUILD_TESTS "Build the tests" ON)
-
 # https://www.kitware.com/cmake-and-the-default-build-type/
 # Set a default build type if none was specified
 set(default_build_type "Release")
