@@ -16,6 +16,8 @@ namespace chrono = std::chrono;
 
 namespace {
 
+using complex = std::complex<double>;
+
 constexpr auto pi = std::numbers::pi_v<double>;
 // constexpr bool IS_LITTLE_ENDIAN = std::bit_cast<uint32_t>(std::array<uint8_t, 4>{1, 0, 0, 0}) == 1;
 
@@ -209,8 +211,6 @@ struct DftInfo {
     double phase;
 };
 
-using complex = std::complex<double>;
-
 struct FourierReturn {
     std::vector<Components> components;
     size_t iterations;
@@ -285,9 +285,10 @@ FourierReturn fast_fourier_transform(const std::vector<int16_t> &data) {
     }
 
     size_t iterations = 0;
+    const auto fft = fast_fourier_transform_inner(data, iterations);
+
     const double N = data.size();
     std::vector<Components> components;
-    const auto fft = fast_fourier_transform_inner(data, iterations);
     for (size_t bin = 0; bin != fft.size(); ++bin) {
         const auto fk = fft[bin];
         const auto magnitude = std::sqrt((fk.real() * fk.real()) + (fk.imag() * fk.imag())) / N;
@@ -332,7 +333,6 @@ int main(const int argc, char const *const *argv) {
     }
     std::println("");
 
-    // Check DFT and FFT results match
     const auto dft = [&channel_data] {
         const auto t0 = chrono::steady_clock::now();
         const auto dft = discrete_fourier_transform(channel_data);
@@ -351,6 +351,7 @@ int main(const int argc, char const *const *argv) {
         return fft.components;
     }();
 
+    // Check DFT and FFT results match
     if (dft.size() != fft.size()) {
         std::println("Expected equal sizes for DFT and FFT");
         std::println("DFT: {}, FFT: {}", dft.size(), fft.size());

@@ -22,7 +22,6 @@ jobs:
       - run: >
           sudo apt-get install -y
           ninja-build
-      - run: ls -lah
       - run: >
           cmake
           -S .
